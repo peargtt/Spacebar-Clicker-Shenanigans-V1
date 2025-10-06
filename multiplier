@@ -1,0 +1,1 @@
+javascript:(function() { game.counter.multiplier = 20})();
