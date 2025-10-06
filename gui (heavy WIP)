@@ -1,0 +1,127 @@
+// ---- SPAMMER SCRIPT ----
+let spamming = false; // Variable to control the spamming state
+let spacebarInterval; // Hold the interval reference
+
+function startSpam(ratePerSecond) {
+  stopSpam(); // Always clear previous interval if any
+  if (ratePerSecond <= 0 || isNaN(ratePerSecond)) return;
+
+  // If CPS is less than 1000, use setInterval for each press
+  if (ratePerSecond <= 1000) {
+    spacebarInterval = setInterval(() => {
+      sendSpacebarEvent();
+    }, 1000 / ratePerSecond);
+  } else {
+    // For high rates, batch presses to avoid setInterval's minimum delay
+    spacebarInterval = setInterval(() => {
+      for (let i = 0; i < Math.ceil(ratePerSecond / 100); i++) {
+        sendSpacebarEvent();
+      }
+    }, 10); // 10ms interval, adjust batch size accordingly
+  }
+  spamming = true;
+  console.log(`Spacebar spam started at ${ratePerSecond} presses per second.`);
+}
+
+function stopSpam() {
+  if (spacebarInterval) clearInterval(spacebarInterval);
+  spamming = false;
+  console.log("Spacebar spam stopped.");
+}
+
+function sendSpacebarEvent() {
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+  document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', bubbles: true }));
+}
+
+function toggleSpacebarSpam() {
+  if (spamming) {
+    stopSpam();
+  } else {
+    const rate = parseInt(typeInput.value, 10);
+    const pressesPerSecond = (isNaN(rate) || rate <= 0) ? 20 : rate;
+    startSpam(pressesPerSecond);
+  }
+}
+
+// ---- GUI CODE ----
+const guiContainer = document.createElement('div');
+
+// Create title element
+const myTitle = document.createElement('div');
+myTitle.textContent = 'Spacebar Clicker Shenanigans V1';
+myTitle.style.fontWeight = 'bold';
+myTitle.style.fontSize = '18px';
+myTitle.style.marginBottom = '12px';
+myTitle.style.alignSelf = 'flex-start';
+
+// Multiplier input and button (left unchanged)
+const myInput = document.createElement('input');
+myInput.type = 'text';
+myInput.placeholder = 'Enter Multiplier';
+
+const myButton = document.createElement('button');
+myButton.textContent = 'Set Multiplier';
+
+let myVariable = ""; // This variable will be set by the input field
+myInput.addEventListener('input', () => {
+    myVariable = myInput.value;
+    console.log('Spacebar Multiplier set to:', myVariable);
+});
+myButton.addEventListener('click', () => {
+    console.log('Button clicked!');
+    alert('Variable value: ' + myVariable);
+    javascript:(function() { game.counter.multiplier = myVariable})();
+});
+
+// Spam rate input & toggle button
+const typeInput = document.createElement('input');
+typeInput.type = 'number';
+typeInput.placeholder = 'Spacebar Presses per Second';
+typeInput.min = '1';
+typeInput.style.marginTop = '10px';
+typeInput.style.marginBottom = '4px';
+typeInput.style.alignSelf = 'flex-start';
+
+const spamButton = document.createElement('button');
+spamButton.textContent = 'Toggle Spacebar Spam';
+spamButton.addEventListener('click', toggleSpacebarSpam);
+
+// Confirm button for instant presses
+const confirmButton = document.createElement('button');
+confirmButton.textContent = 'Confirm';
+confirmButton.addEventListener('click', () => {
+  const times = parseInt(typeInput.value, 10);
+  if (isNaN(times) || times <= 0) {
+    alert('Please enter a valid number greater than 0!');
+    return;
+  }
+  for (let i = 0; i < times; i++) {
+    sendSpacebarEvent();
+  }
+  console.log(`Simulated ${times} spacebar presses instantly.`);
+});
+
+// ---- Style and Append elements ----
+guiContainer.style.position = 'fixed';
+guiContainer.style.top = '10px';
+guiContainer.style.right = '10px';
+guiContainer.style.border = '1px solid black';
+guiContainer.style.padding = '16px';
+guiContainer.style.backgroundColor = 'white';
+guiContainer.style.zIndex = '9999';
+guiContainer.style.display = 'flex';
+guiContainer.style.flexDirection = 'column';
+guiContainer.style.alignItems = 'flex-start'; // Align to left
+
+myInput.style.marginBottom = '8px';
+myInput.style.alignSelf = 'flex-start';
+
+guiContainer.appendChild(myTitle);      // Title
+guiContainer.appendChild(myInput);     // Multiplier input
+guiContainer.appendChild(myButton);    // Multiplier set button
+guiContainer.appendChild(typeInput);   // Spacebar presses per second input
+guiContainer.appendChild(spamButton);  // Toggle spam button
+guiContainer.appendChild(confirmButton); // Instant fire button
+
+document.body.appendChild(guiContainer);
