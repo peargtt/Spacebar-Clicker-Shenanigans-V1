@@ -1,23 +1,202 @@
-const myInput = document.createElement('input');
-myInput.type = 'text';
-myInput.placeholder = 'Enter Multiplier';
+(function() {
+  // Wait for DOM if needed
+  function ready(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
+    }
+  }
 
-const myButton = document.createElement('button');
-myButton.textContent = 'Set Multiplier';
+  ready(function() {
+    // --- GUI CREATION ---
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '16px';
+    container.style.right = '16px';
+    container.style.background = '#222';
+    container.style.padding = '18px 14px 14px 18px';
+    container.style.borderRadius = '12px';
+    container.style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
+    container.style.color = '#fff';
+    container.style.fontFamily = 'sans-serif';
+    container.style.textAlign = 'center';
+    container.style.minWidth = '220px';
+    container.style.zIndex = '9999';
+    container.style.cursor = 'grab';
+    container.style.userSelect = 'none';
 
-let myVariable = ""; // Will be set by the input field
-myInput.addEventListener('input', () => {
-    myVariable = myInput.value;
-    console.log('Spacebar Multiplier input:', myVariable);
-});
+    // --- CLOSE BUTTON ---
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.title = 'Close';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '6px';
+    closeBtn.style.right = '8px';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.border = 'none';
+    closeBtn.style.fontSize = '1.3em';
+    closeBtn.style.color = '#fff';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.fontWeight = 'bold';
+    closeBtn.style.padding = '0';
+    closeBtn.style.lineHeight = '1em';
+    closeBtn.style.zIndex = '10001';
+    closeBtn.addEventListener('click', () => {
+      container.remove();
+    });
 
-myButton.addEventListener('click', () => {
-    const value = Number(myVariable);
-    if (isNaN(value) || value <= 0) {
+    // --- TITLE ---
+    const title = document.createElement('div');
+    title.textContent = 'Spacebar Clicker Shenanigans v1';
+    title.style.fontSize = '1.15em';
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '16px';
+    title.style.letterSpacing = '0.5px';
+
+    // --- COUNTER DISPLAY ---
+    const counterDisplay = document.createElement('div');
+    counterDisplay.textContent = 'Count: 0';
+    counterDisplay.style.fontSize = '1.2em';
+    counterDisplay.style.marginBottom = '12px';
+
+    // --- DRAGGABLE LOGIC ---
+    let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
+    container.addEventListener('mousedown', function(e) {
+      if (e.target === container || e.target === title) {
+        isDragging = true;
+        dragOffsetX = e.clientX - container.getBoundingClientRect().left;
+        dragOffsetY = e.clientY - container.getBoundingClientRect().top;
+        container.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+        container.style.left = (e.clientX - dragOffsetX) + 'px';
+        container.style.top = (e.clientY - dragOffsetY) + 'px';
+        container.style.right = '';
+        container.style.position = 'fixed';
+      }
+    });
+    document.addEventListener('mouseup', function() {
+      if (isDragging) {
+        isDragging = false;
+        container.style.cursor = 'grab';
+      }
+    });
+
+    // Multiplier input
+    const myInput = document.createElement('input');
+    myInput.type = 'number';
+    myInput.min = '1';
+    myInput.placeholder = 'Enter Multiplier';
+    myInput.style.marginBottom = '8px';
+    myInput.style.padding = '7px 10px';
+    myInput.style.borderRadius = '5px';
+    myInput.style.border = 'none';
+    myInput.style.fontSize = '1em';
+    myInput.style.width = '150px';
+
+    // Multiplier button
+    const myButton = document.createElement('button');
+    myButton.textContent = 'Set Multiplier';
+    myButton.style.margin = '8px';
+    myButton.style.padding = '7px 16px';
+    myButton.style.borderRadius = '5px';
+    myButton.style.border = 'none';
+    myButton.style.background = '#09f';
+    myButton.style.color = '#fff';
+    myButton.style.fontWeight = 'bold';
+    myButton.style.fontSize = '1em';
+    myButton.style.cursor = 'pointer';
+
+    // Spacebar spam button
+    const spamButton = document.createElement('button');
+    spamButton.textContent = 'Start Spacebar Spam';
+    spamButton.style.margin = '8px';
+    spamButton.style.padding = '7px 16px';
+    spamButton.style.borderRadius = '5px';
+    spamButton.style.border = 'none';
+    spamButton.style.background = '#8f0';
+    spamButton.style.color = '#222';
+    spamButton.style.fontWeight = 'bold';
+    spamButton.style.fontSize = '1em';
+    spamButton.style.cursor = 'pointer';
+
+    // Add to container
+    container.appendChild(closeBtn);
+    container.appendChild(title);
+    container.appendChild(counterDisplay);
+    container.appendChild(myInput);
+    container.appendChild(myButton);
+    container.appendChild(document.createElement('br'));
+    container.appendChild(spamButton);
+    document.body.appendChild(container);
+
+    // --- LOGIC ---
+    const game = {
+      counter: {
+        value: 0,
+        multiplier: 1
+      }
+    };
+
+    function updateCounterDisplay() {
+      counterDisplay.textContent = 'Count: ' + game.counter.value;
+    }
+
+    myInput.value = "1";
+    let myVariable = "1";
+    myInput.addEventListener('input', () => {
+      myVariable = myInput.value;
+    });
+
+    myButton.addEventListener('click', () => {
+      const value = Number(myVariable);
+      if (isNaN(value) || value <= 0) {
         alert('Please enter a valid multiplier greater than 0!');
         return;
+      }
+      game.counter.multiplier = value;
+      alert('Multiplier set to: ' + value);
+    });
+
+    // Spacebar handling for counter (with counter display update)
+    window.addEventListener('keydown', (event) => {
+      if (event.code === 'Space' && !event.repeat) {
+        game.counter.value += game.counter.multiplier;
+        updateCounterDisplay();
+      }
+    });
+
+    // Spacebar spam logic
+    let spamming = false;
+    let spacebarInterval;
+
+    function toggleSpacebarSpam() {
+      if (spamming) {
+        clearInterval(spacebarInterval);
+        spamming = false;
+        spamButton.textContent = 'Start Spacebar Spam';
+        spamButton.style.background = '#8f0';
+        console.log("Spacebar spamming stopped.");
+      } else {
+        spacebarInterval = setInterval(() => {
+          for (let i = 0; i < 20; i++) {
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+            document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', bubbles: true }));
+          }
+        }, 50);
+        spamming = true;
+        spamButton.textContent = 'Stop Spacebar Spam';
+        spamButton.style.background = '#f50';
+        console.log("Spacebar spamming started.");
+      }
     }
-    game.counter.multiplier = value;
-    console.log('Multiplier set to:', value);
-    alert('Multiplier set to: ' + value);
-});
+    spamButton.addEventListener('click', toggleSpacebarSpam);
+
+    // Initial display update
+    updateCounterDisplay();
+  });
+})();
