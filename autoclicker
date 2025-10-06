@@ -1,0 +1,22 @@
+let spamming = false; // Variable to control the spamming state
+
+function toggleSpacebarSpam() {
+  if (spamming) {
+    clearInterval(spacebarInterval); // Stop the interval if already spamming
+    spamming = false;
+    console.log("Spacebar spamming stopped.");
+  } else {
+    // Simulate a spacebar press every 50 milliseconds (adjust as needed)
+    spacebarInterval = setInterval(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+      document.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', code: 'Space', bubbles: true }));
+    }, 50); // Adjust interval for desired speed
+    spamming = true;
+    console.log("Spacebar spamming started. Use toggleSpacebarSpam() to stop.");
+  }
+}
+
+// To start spamming, type toggleSpacebarSpam() in the console and press Enter.
+// To stop spamming, type toggleSpacebarSpam() again.
+
+
